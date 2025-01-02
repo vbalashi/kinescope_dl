@@ -1,0 +1,29 @@
+# Ignore everything
+*
+
+# But not these files...
+!.gitignore
+!README.md
+!kdy.py
+
+# Even if they are in subdirectories
+!*/
+
+# Ignore ffmpeg and N_m3u8DL-RE binaries
+ffmpeg.exe
+N_m3u8DL-RE.exe
+
+# Ignore downloaded videos
+*.mp4
+*.ts
+*.m4s
+*.m3u8
+*.mpd
+
+# Ignore logs
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class 
