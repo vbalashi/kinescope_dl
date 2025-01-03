@@ -70,7 +70,7 @@ def main():
                 print(f'Referrer: {referrer}')
                 
                 # Create full path for the output file
-                output_path = os.path.join(download_folder, title)
+                output_path = os.path.join(download_folder, f"{title}.mp4")
                 
                 run_args = [
                     m3u8DL_RE_path,
