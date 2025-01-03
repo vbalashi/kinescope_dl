@@ -4,6 +4,7 @@ import argparse
 import sys
 import os
 from datetime import datetime
+import re
 
 """
 Video Downloader for Kinescope.io
@@ -15,6 +16,15 @@ Usage:
     python kdy.py [--help]
     python kdy.py --list path/to/list.csv --folder my_downloads
 """
+
+def sanitize_filename(filename):
+    # Remove or replace special characters
+    filename = re.sub(r'[<>:"/\\|?*]', '_', filename)
+    # Replace multiple spaces with single space
+    filename = re.sub(r'\s+', ' ', filename)
+    # Trim spaces from ends
+    filename = filename.strip()
+    return filename
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -40,13 +50,15 @@ m3u8DL_RE_path = 'N_m3u8DL-RE.exe'
 def main():
     args = parse_arguments()
     
-    # Create download folder
+    # Create download folder with absolute path
     if args.folder:
         download_folder = args.folder
     else:
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         download_folder = f"download_{current_time}"
     
+    # Convert to absolute path
+    download_folder = os.path.abspath(download_folder)
     os.makedirs(download_folder, exist_ok=True)
     
     try:
@@ -59,6 +71,9 @@ def main():
                 # Extract data from CSV row
                 title, referrer, mpd_url = row
                 
+                # Sanitize the title for use as filename
+                safe_title = sanitize_filename(title)
+                
                 # Use previous referrer if current is empty
                 if not referrer.strip():
                     referrer = last_referrer
@@ -70,7 +85,7 @@ def main():
                 print(f'Referrer: {referrer}')
                 
                 # Create full path for the output file
-                output_path = os.path.join(download_folder, f"{title}.mp4")
+                output_path = os.path.join(download_folder, f"{safe_title}.mp4")
                 
                 run_args = [
                     m3u8DL_RE_path,
@@ -79,7 +94,8 @@ def main():
                     '--log-level', 'INFO',
                     '--del-after-done',
                     '-M', 'format=mp4:muxer=ffmpeg',
-                    '--save-name', output_path,
+                    '--save-dir', download_folder,  # Specify output directory
+                    '--save-name', safe_title,      # Use sanitized filename
                     '--auto-select',  # Will select best quality automatically
                     mpd_url
                 ]
